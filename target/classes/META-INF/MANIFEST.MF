@@ -1,6 +1,0 @@
-Manifest-Version: 1.0
-Implementation-Title: SB_COR_Common-Utils
-Implementation-Version: 0.0.2-GA
-Build-Jdk-Spec: 1.8
-Created-By: Maven Integration for Eclipse
-
