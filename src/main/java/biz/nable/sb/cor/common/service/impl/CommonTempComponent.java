@@ -20,6 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -66,8 +67,8 @@ public class CommonTempComponent {
 	@Autowired
 	RestTemplate restTemplate;
 
-	@Value("${create.approval.url}")
-	private String createApprovalUrl;
+	@Value("${nable.biz.common.util.approval.service.url}")
+	private String approvalServiceUrl;
 
 	Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -159,6 +160,7 @@ public class CommonTempComponent {
 		HttpEntity<CreateApprovalRequest> entity = new HttpEntity<>(request, headers);
 		CreateApprovalResponse response = null;
 		try {
+			String createApprovalUrl = approvalServiceUrl + "/v1/approval";
 			ResponseEntity<CreateApprovalResponse> responseEntity = restTemplate.postForEntity(createApprovalUrl,
 					entity, CreateApprovalResponse.class);
 			if (null != responseEntity.getBody()) {
@@ -168,10 +170,10 @@ public class CommonTempComponent {
 				throw new SystemException(messageSource.getMessage(ErrorCode.CREATE_APPROVAL_ERROR, null,
 						LocaleContextHolder.getLocale()), ErrorCode.CREATE_APPROVAL_ERROR);
 			}
-		} catch (Exception e) {
-			throw new SystemException(
-					messageSource.getMessage(ErrorCode.CREATE_APPROVAL_ERROR, null, LocaleContextHolder.getLocale()), e,
-					ErrorCode.CREATE_APPROVAL_ERROR);
+		} catch (HttpClientErrorException e) {
+			logger.error("Error occred while creating Approval request: ", e);
+			response = commonConverter.jsonToObject(e.getResponseBodyAsString(), CreateApprovalResponse.class);
+			throw new SystemException(response.getReturnMessage(), String.valueOf(response.getReturnCode()));
 		}
 		logger.info("End create approval request successfuly");
 		return response;
@@ -272,6 +274,37 @@ public class CommonTempComponent {
 					messageSource.getMessage(ErrorCode.NO_TEMP_RECORD_FOUND, null, LocaleContextHolder.getLocale()),
 					ErrorCode.NO_TEMP_RECORD_FOUND);
 		}
+	}
+
+	public List<TempDto> getAuthPendingList(CommonSearchBean commonSearchBean) {
+		String searchBy = commonSearchBean.getHashTags();
+		String requestType = commonSearchBean.getRequestType();
+		List<TempDto> list = new ArrayList<>();
+		logger.info("Start fetching getAuthPendingList requestType: {}, status: {}, searchBy: {}", requestType,
+				ApprovalStatus.PENDING, searchBy);
+		List<CommonTemp> commonTemps = tempCustomRepository.findTempRecordList(commonSearchBean);
+
+		if (!commonTemps.isEmpty()) {
+			logger.info("{} Temp records found", commonTemps.size());
+			for (CommonTemp commonTemp : commonTemps) {
+				TempDto dto = new TempDto();
+				try {
+					BeanUtils.copyProperties(dto, commonTemp);
+					dto.setSignature(signatureComponent.genarateSignature(commonTemp));
+				} catch (Exception e) {
+					throw new InvalidRequestException(
+							messageSource.getMessage(ErrorCode.DATA_COPY_ERROR, null, LocaleContextHolder.getLocale()),
+							ErrorCode.DATA_COPY_ERROR);
+				}
+				list.add(dto);
+			}
+		} else {
+			String msg = messageSource.getMessage(ErrorCode.NO_TEMP_RECORD_FOUND, null,
+					LocaleContextHolder.getLocale());
+			logger.error(msg);
+			throw new RecordNotFoundException(msg, ErrorCode.NO_TEMP_RECORD_FOUND);
+		}
+		return list;
 	}
 
 }
