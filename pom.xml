@@ -110,9 +110,9 @@
 	<distributionManagement>
     		<repository>
         		<uniqueVersion>false</uniqueVersion>
-        		<id>github</id>
+        		<id>local</id>
         		<name>nable Repository</name>
-        		<url>https://maven.pkg.github.com/n-ableprivatelimitedcolombosrilanka/SB_JAVA_COR_Common-Utils</url>
+        		<url>http://192.168.50.18:8081/repository/java-artifacts/</url>
         		<layout>default</layout>
     		</repository>
 	</distributionManagement>
