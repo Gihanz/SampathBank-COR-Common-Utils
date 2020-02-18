@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import biz.nable.sb.cor.common.bean.ApprovalBean;
+import biz.nable.sb.cor.common.bean.CommonSearchBean;
 import biz.nable.sb.cor.common.service.impl.ApprovalComponent;
 
 /**
@@ -22,22 +22,22 @@ import biz.nable.sb.cor.common.service.impl.ApprovalComponent;
 @Aspect
 @Order(3)
 @Component
-public class ApprovalAspect {
+public class AuthPendingAspect {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired
 	ApprovalComponent approvalComponent;
 
-	@Around(value = "@annotation(biz.nable.sb.cor.common.annotation.Approve)")
+	@Around(value = "@annotation(biz.nable.sb.cor.common.annotation.AuthPending)")
 	public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
-		logger.info("Start Approve annotation");
+		logger.info("Start AuthPending annotation");
 		joinPoint.proceed(joinPoint.getArgs());
 
 		Object[] args = joinPoint.getArgs();
-		ApprovalBean approvalBean = (ApprovalBean) args[0];
+		CommonSearchBean commonSearchBean = (CommonSearchBean) args[0];
 
-		return approvalComponent.updateCommonTemp(approvalBean);
+		return approvalComponent.getAuthPending(commonSearchBean);
 	}
-	
+
 }

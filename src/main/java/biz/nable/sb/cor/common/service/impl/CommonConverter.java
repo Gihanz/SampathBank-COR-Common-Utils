@@ -41,4 +41,14 @@ public class CommonConverter {
 					ErrorCode.STRING_TO_MAP_ERROR);
 		}
 	}
+
+	public <T> T jsonToObject(String json, Class<T> toValueType) {
+		try {
+			return objectMapper.readValue(json, toValueType);
+		} catch (IOException e) {
+			throw new SystemException(
+					messageSource.getMessage(ErrorCode.STRING_TO_MAP_ERROR, null, LocaleContextHolder.getLocale()), e,
+					ErrorCode.STRING_TO_MAP_ERROR);
+		}
+	}
 }
