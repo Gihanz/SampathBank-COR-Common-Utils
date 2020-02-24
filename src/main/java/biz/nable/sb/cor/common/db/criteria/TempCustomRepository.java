@@ -55,6 +55,7 @@ public class TempCustomRepository {
 				userGroupCriteriaBuilder(predicates, criteriaBuilder, root, searchBean);
 				userIdCriteriaBuilder(predicates, criteriaBuilder, root, searchBean);
 				hashTagsCriteriaBuilder(predicates, criteriaBuilder, root, searchBean);
+				statusCriteriaBuilder(predicates, criteriaBuilder, root, searchBean);
 
 				return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
 			}
@@ -107,6 +108,14 @@ public class TempCustomRepository {
 		if (null != commonSearchBean.getHashTags() && !commonSearchBean.getHashTags().isEmpty()) {
 			predicates.add(criteriaBuilder
 					.and(criteriaBuilder.like(root.get("hashTags"), "%" + commonSearchBean.getHashTags() + "%")));
+		}
+	}
+
+	private void statusCriteriaBuilder(List<Predicate> predicates, CriteriaBuilder criteriaBuilder,
+			Root<CommonTemp> root, CommonSearchBean commonSearchBean) {
+		if (null != commonSearchBean.getStatus()) {
+			predicates.add(
+					criteriaBuilder.and(criteriaBuilder.equal(root.get("status"), commonSearchBean.getStatus())));
 		}
 	}
 

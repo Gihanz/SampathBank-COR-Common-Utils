@@ -149,7 +149,7 @@ public class ApprovalComponent {
 				ApprovalStatus.PENDING, searchBy);
 		String userId = commonSearchBean.getUserId();
 		commonSearchBean.setUserId(null);
-
+		commonSearchBean.setStatus(ApprovalStatus.PENDING);
 		List<CommonTemp> commonTemps = tempCustomRepository.findTempRecordList(commonSearchBean);
 
 		if (!commonTemps.isEmpty()) {

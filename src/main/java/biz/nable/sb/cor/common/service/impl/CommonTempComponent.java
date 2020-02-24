@@ -225,7 +225,7 @@ public class CommonTempComponent {
 		List<TempDto> list = new ArrayList<>();
 		logger.info("Start fetching temp record requestType: {}, status: {}, searchBy: {}", requestType,
 				ApprovalStatus.PENDING, searchBy);
-
+		commonSearchBean.setStatus(ApprovalStatus.PENDING);
 		List<CommonTemp> commonTemps = tempCustomRepository.findTempRecordList(commonSearchBean);
 
 		if (!commonTemps.isEmpty()) {
@@ -282,6 +282,8 @@ public class CommonTempComponent {
 		List<TempDto> list = new ArrayList<>();
 		logger.info("Start fetching getAuthPendingList requestType: {}, status: {}, searchBy: {}", requestType,
 				ApprovalStatus.PENDING, searchBy);
+
+		commonSearchBean.setStatus(ApprovalStatus.PENDING);
 		List<CommonTemp> commonTemps = tempCustomRepository.findTempRecordList(commonSearchBean);
 
 		if (!commonTemps.isEmpty()) {
