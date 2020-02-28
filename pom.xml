@@ -110,7 +110,7 @@
 	<distributionManagement>
 		<repository>
 			<uniqueVersion>false</uniqueVersion>
-			<id>local</id>
+			<id>nable-local-repository</id>
 			<name>nable Repository</name>
 			<url>http://192.168.50.18:8081/repository/java-artifacts/</url>
 			<layout>default</layout>
