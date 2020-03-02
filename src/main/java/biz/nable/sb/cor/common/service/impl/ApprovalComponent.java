@@ -87,8 +87,6 @@ public class ApprovalComponent {
 		commonTemp.setLastUpdatedBy(approvalBean.getEnteredBy());
 		commonTemp.setComment(null != approvalBean.getComment() ? approvalBean.getComment() : "");
 		commonTemp.setStatus(ApprovalStatus.valueOf(approvalBean.getApprovalStatus()));
-		commonTempRepository.save(commonTemp);
-		logger.info("commonTemp DB updated");
 
 		if (!ApprovalStatus.VERIFIED.name().equalsIgnoreCase(approvalBean.getApprovalStatus())) {
 			addToCommonRejected(approvalBean, commonTemp);
@@ -107,8 +105,11 @@ public class ApprovalComponent {
 		commonTempHis.setTempId(commonTemp.getId());
 		commonTempHis.setComment(null != approvalBean.getComment() ? approvalBean.getComment() : "");
 		commonTempHisRepository.save(commonTempHis);
-
 		logger.info("Insert new history record to commonTempHis table");
+
+		commonTempRepository.delete(commonTemp);
+		logger.info("Delete commonTemp record");
+
 		commonResponse.setTempDto(tempDto);
 		commonResponse.setReturnCode(HttpStatus.OK.value());
 		commonResponse.setErrorCode(ErrorCode.OPARATION_SUCCESS);

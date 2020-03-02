@@ -30,6 +30,7 @@ import biz.nable.sb.cor.common.bean.CommonRequestBean;
 import biz.nable.sb.cor.common.bean.CommonResponseBean;
 import biz.nable.sb.cor.common.bean.CommonSearchBean;
 import biz.nable.sb.cor.common.bean.CommonTempBean;
+import biz.nable.sb.cor.common.bean.FindByApprovalIdBean;
 import biz.nable.sb.cor.common.bean.FindTempByRefBean;
 import biz.nable.sb.cor.common.bean.TempDto;
 import biz.nable.sb.cor.common.db.criteria.TempCustomRepository;
@@ -157,6 +158,7 @@ public class CommonTempComponent {
 		request.setType(requestType);
 		request.setActionType(actionType.name());
 		request.setEnteredDate(new Date());
+
 		HttpEntity<CreateApprovalRequest> entity = new HttpEntity<>(request, headers);
 		CreateApprovalResponse response = null;
 		try {
@@ -309,4 +311,27 @@ public class CommonTempComponent {
 		return list;
 	}
 
+	public Object getCommonTempByApproveId(FindByApprovalIdBean findTempByApprovalIdBean) {
+		String approvalId = findTempByApprovalIdBean.getApprovalId();
+		Optional<CommonTemp> optional = commonTempRepository.findByApprovalIdAndStatus(approvalId,
+				ApprovalStatus.PENDING);
+		CommonTemp commonTemp;
+		if (optional.isPresent()) {
+			commonTemp = optional.get();
+			TempDto tempDto = new TempDto();
+			try {
+				BeanUtils.copyProperties(tempDto, commonTemp);
+				tempDto.setSignature(signatureComponent.genarateSignature(commonTemp));
+			} catch (Exception e) {
+				throw new InvalidRequestException(
+						messageSource.getMessage(ErrorCode.DATA_COPY_ERROR, null, LocaleContextHolder.getLocale()),
+						ErrorCode.DATA_COPY_ERROR);
+			}
+			return tempDto;
+		} else {
+			throw new RecordNotFoundException(
+					messageSource.getMessage(ErrorCode.NO_TEMP_RECORD_FOUND, null, LocaleContextHolder.getLocale()),
+					ErrorCode.NO_TEMP_RECORD_FOUND);
+		}
+	}
 }
