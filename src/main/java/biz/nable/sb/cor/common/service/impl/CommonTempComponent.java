@@ -311,7 +311,7 @@ public class CommonTempComponent {
 		return list;
 	}
 
-	public Object getCommonTempByApproveId(FindByApprovalIdBean findTempByApprovalIdBean) {
+	public TempDto getCommonTempByApproveId(FindByApprovalIdBean findTempByApprovalIdBean) {
 		String approvalId = findTempByApprovalIdBean.getApprovalId();
 		Optional<CommonTemp> optional = commonTempRepository.findByApprovalIdAndStatus(approvalId,
 				ApprovalStatus.PENDING);

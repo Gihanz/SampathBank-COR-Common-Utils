@@ -194,8 +194,11 @@ public class ApprovalComponent {
 		headers.set("userId", commonSearchBean.getUserId());
 		HttpEntity<CreateApprovalRequest> entity = new HttpEntity<>(headers);
 		try {
-			String authPendinghListUrl = approvalServiceUrl + "/v1/my/approval?type="
-					+ commonSearchBean.getRequestType();
+			String authPendinghListUrl = approvalServiceUrl + "/v1/my/approval?type=";
+
+			if (null != commonSearchBean.getRequestType()) {
+				authPendinghListUrl += commonSearchBean.getRequestType();
+			}
 			ResponseEntity<ApprovalResponse> responseEntity = restTemplate.exchange(authPendinghListUrl, HttpMethod.GET,
 					entity, ApprovalResponse.class);
 			if (responseEntity.getStatusCode() != HttpStatus.OK) {
