@@ -29,7 +29,7 @@ public class TempByApprovalIdAspect {
 	@Autowired
 	CommonTempComponent commonTempComponent;
 
-	@Around(value = "@annotation(FindByApprovalId)")
+	@Around(value = "@annotation(biz.nable.sb.cor.common.annotation.FindByApprovalId)")
 	public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
 		logger.info("Start FindTempRecordByApprovalId annotation");
 		joinPoint.proceed(joinPoint.getArgs());
