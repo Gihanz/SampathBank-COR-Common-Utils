@@ -120,6 +120,17 @@ public class CommonTempComponent {
 
 		commonTempHis.setTempId(commonTemp.getId());
 
+		if (Boolean.FALSE.equals(isExisting)) {
+			CreateApprovalResponse createApprovalResponse = createApproval(userId, userGroup, requestId, requestType,
+					referenceNo, actionType);
+			commonTemp.setApprovalId(createApprovalResponse.getApprovalBean().getApprovalId());
+			commonTempHis.setApprovalId(createApprovalResponse.getApprovalBean().getApprovalId());
+
+			commonTemp = commonTempRepository.save(commonTemp);
+			logger.info("Update temp");
+		}
+		commonTempHisRepository.save(commonTempHis);
+		logger.info("save to history");
 		commonResponse = new CommonResponseBean();
 		commonResponse.setErrorCode(ErrorCode.OPARATION_SUCCESS);
 		commonResponse.setReturnCode(HttpStatus.OK.value());
@@ -127,19 +138,7 @@ public class CommonTempComponent {
 				messageSource.getMessage(ErrorCode.OPARATION_SUCCESS, null, LocaleContextHolder.getLocale()));
 		commonResponse.setCommonTempBean(commonRequestBean.getCommonTempBean());
 		commonResponse.setTempId(String.valueOf(commonTemp.getId()));
-
-		if (Boolean.FALSE.equals(isExisting)) {
-			CreateApprovalResponse createApprovalResponse = createApproval(userId, userGroup, requestId, requestType,
-					referenceNo, actionType);
-			commonTemp.setApprovalId(createApprovalResponse.getApprovalBean().getApprovalId());
-			commonTempHis.setApprovalId(createApprovalResponse.getApprovalBean().getApprovalId());
-
-			commonTempRepository.save(commonTemp);
-			logger.info("Update temp");
-		}
-		commonTempHisRepository.save(commonTempHis);
-		logger.info("save to history");
-
+		commonResponse.setApprovalId(commonTemp.getApprovalId());
 		return commonResponse;
 	}
 

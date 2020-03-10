@@ -9,4 +9,5 @@ import lombok.Setter;
 public class CommonResponseBean extends CommonResponse {
 	private CommonTempBean commonTempBean;
 	private String tempId;
+	private String approvalId;
 }
