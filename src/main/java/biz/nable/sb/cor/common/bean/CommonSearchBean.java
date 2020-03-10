@@ -5,6 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import biz.nable.sb.cor.common.utility.ActionTypeEnum;
+import biz.nable.sb.cor.common.utility.ApprovalStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,9 +17,9 @@ public class CommonSearchBean implements SearchCriteriaObject {
 	private String userGroup;
 	private String hashTags;
 	private String tempId;
-	private String status;
+	private ApprovalStatus status;
 	private String requestType;
-	ActionTypeEnum actionType;
+	private ActionTypeEnum actionType;
 	@JsonIgnore
 	private List<TempDto> tempList;
 }

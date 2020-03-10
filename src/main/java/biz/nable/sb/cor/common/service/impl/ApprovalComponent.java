@@ -87,8 +87,6 @@ public class ApprovalComponent {
 		commonTemp.setLastUpdatedBy(approvalBean.getEnteredBy());
 		commonTemp.setComment(null != approvalBean.getComment() ? approvalBean.getComment() : "");
 		commonTemp.setStatus(ApprovalStatus.valueOf(approvalBean.getApprovalStatus()));
-		commonTempRepository.save(commonTemp);
-		logger.info("commonTemp DB updated");
 
 		if (!ApprovalStatus.VERIFIED.name().equalsIgnoreCase(approvalBean.getApprovalStatus())) {
 			addToCommonRejected(approvalBean, commonTemp);
@@ -107,8 +105,11 @@ public class ApprovalComponent {
 		commonTempHis.setTempId(commonTemp.getId());
 		commonTempHis.setComment(null != approvalBean.getComment() ? approvalBean.getComment() : "");
 		commonTempHisRepository.save(commonTempHis);
-
 		logger.info("Insert new history record to commonTempHis table");
+
+		commonTempRepository.delete(commonTemp);
+		logger.info("Delete commonTemp record");
+
 		commonResponse.setTempDto(tempDto);
 		commonResponse.setReturnCode(HttpStatus.OK.value());
 		commonResponse.setErrorCode(ErrorCode.OPARATION_SUCCESS);
@@ -149,7 +150,7 @@ public class ApprovalComponent {
 				ApprovalStatus.PENDING, searchBy);
 		String userId = commonSearchBean.getUserId();
 		commonSearchBean.setUserId(null);
-
+		commonSearchBean.setStatus(ApprovalStatus.PENDING);
 		List<CommonTemp> commonTemps = tempCustomRepository.findTempRecordList(commonSearchBean);
 
 		if (!commonTemps.isEmpty()) {
@@ -193,8 +194,11 @@ public class ApprovalComponent {
 		headers.set("userId", commonSearchBean.getUserId());
 		HttpEntity<CreateApprovalRequest> entity = new HttpEntity<>(headers);
 		try {
-			String authPendinghListUrl = approvalServiceUrl + "/v1/my/approval?type="
-					+ commonSearchBean.getRequestType();
+			String authPendinghListUrl = approvalServiceUrl + "/v1/my/approval?type=";
+
+			if (null != commonSearchBean.getRequestType()) {
+				authPendinghListUrl += commonSearchBean.getRequestType();
+			}
 			ResponseEntity<ApprovalResponse> responseEntity = restTemplate.exchange(authPendinghListUrl, HttpMethod.GET,
 					entity, ApprovalResponse.class);
 			if (responseEntity.getStatusCode() != HttpStatus.OK) {

@@ -30,6 +30,7 @@ import biz.nable.sb.cor.common.bean.CommonRequestBean;
 import biz.nable.sb.cor.common.bean.CommonResponseBean;
 import biz.nable.sb.cor.common.bean.CommonSearchBean;
 import biz.nable.sb.cor.common.bean.CommonTempBean;
+import biz.nable.sb.cor.common.bean.FindByApprovalIdBean;
 import biz.nable.sb.cor.common.bean.FindTempByRefBean;
 import biz.nable.sb.cor.common.bean.TempDto;
 import biz.nable.sb.cor.common.db.criteria.TempCustomRepository;
@@ -119,6 +120,17 @@ public class CommonTempComponent {
 
 		commonTempHis.setTempId(commonTemp.getId());
 
+		if (Boolean.FALSE.equals(isExisting)) {
+			CreateApprovalResponse createApprovalResponse = createApproval(userId, userGroup, requestId, requestType,
+					referenceNo, actionType);
+			commonTemp.setApprovalId(createApprovalResponse.getApprovalBean().getApprovalId());
+			commonTempHis.setApprovalId(createApprovalResponse.getApprovalBean().getApprovalId());
+
+			commonTemp = commonTempRepository.save(commonTemp);
+			logger.info("Update temp");
+		}
+		commonTempHisRepository.save(commonTempHis);
+		logger.info("save to history");
 		commonResponse = new CommonResponseBean();
 		commonResponse.setErrorCode(ErrorCode.OPARATION_SUCCESS);
 		commonResponse.setReturnCode(HttpStatus.OK.value());
@@ -126,19 +138,7 @@ public class CommonTempComponent {
 				messageSource.getMessage(ErrorCode.OPARATION_SUCCESS, null, LocaleContextHolder.getLocale()));
 		commonResponse.setCommonTempBean(commonRequestBean.getCommonTempBean());
 		commonResponse.setTempId(String.valueOf(commonTemp.getId()));
-
-		if (Boolean.FALSE.equals(isExisting)) {
-			CreateApprovalResponse createApprovalResponse = createApproval(userId, userGroup, requestId, requestType,
-					referenceNo, actionType);
-			commonTemp.setApprovalId(createApprovalResponse.getApprovalBean().getApprovalId());
-			commonTempHis.setApprovalId(createApprovalResponse.getApprovalBean().getApprovalId());
-
-			commonTempRepository.save(commonTemp);
-			logger.info("Update temp");
-		}
-		commonTempHisRepository.save(commonTempHis);
-		logger.info("save to history");
-
+		commonResponse.setApprovalId(commonTemp.getApprovalId());
 		return commonResponse;
 	}
 
@@ -157,6 +157,7 @@ public class CommonTempComponent {
 		request.setType(requestType);
 		request.setActionType(actionType.name());
 		request.setEnteredDate(new Date());
+
 		HttpEntity<CreateApprovalRequest> entity = new HttpEntity<>(request, headers);
 		CreateApprovalResponse response = null;
 		try {
@@ -225,7 +226,7 @@ public class CommonTempComponent {
 		List<TempDto> list = new ArrayList<>();
 		logger.info("Start fetching temp record requestType: {}, status: {}, searchBy: {}", requestType,
 				ApprovalStatus.PENDING, searchBy);
-
+		commonSearchBean.setStatus(ApprovalStatus.PENDING);
 		List<CommonTemp> commonTemps = tempCustomRepository.findTempRecordList(commonSearchBean);
 
 		if (!commonTemps.isEmpty()) {
@@ -282,6 +283,8 @@ public class CommonTempComponent {
 		List<TempDto> list = new ArrayList<>();
 		logger.info("Start fetching getAuthPendingList requestType: {}, status: {}, searchBy: {}", requestType,
 				ApprovalStatus.PENDING, searchBy);
+
+		commonSearchBean.setStatus(ApprovalStatus.PENDING);
 		List<CommonTemp> commonTemps = tempCustomRepository.findTempRecordList(commonSearchBean);
 
 		if (!commonTemps.isEmpty()) {
@@ -307,4 +310,27 @@ public class CommonTempComponent {
 		return list;
 	}
 
+	public TempDto getCommonTempByApproveId(FindByApprovalIdBean findTempByApprovalIdBean) {
+		String approvalId = findTempByApprovalIdBean.getApprovalId();
+		Optional<CommonTemp> optional = commonTempRepository.findByApprovalIdAndStatus(approvalId,
+				ApprovalStatus.PENDING);
+		CommonTemp commonTemp;
+		if (optional.isPresent()) {
+			commonTemp = optional.get();
+			TempDto tempDto = new TempDto();
+			try {
+				BeanUtils.copyProperties(tempDto, commonTemp);
+				tempDto.setSignature(signatureComponent.genarateSignature(commonTemp));
+			} catch (Exception e) {
+				throw new InvalidRequestException(
+						messageSource.getMessage(ErrorCode.DATA_COPY_ERROR, null, LocaleContextHolder.getLocale()),
+						ErrorCode.DATA_COPY_ERROR);
+			}
+			return tempDto;
+		} else {
+			throw new RecordNotFoundException(
+					messageSource.getMessage(ErrorCode.NO_TEMP_RECORD_FOUND, null, LocaleContextHolder.getLocale()),
+					ErrorCode.NO_TEMP_RECORD_FOUND);
+		}
+	}
 }
