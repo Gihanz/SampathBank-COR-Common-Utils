@@ -92,7 +92,17 @@ public class CommonTempComponent {
 
 		String referenceNo = commonRequestBean.getReferenceNo();
 
-		CommonTemp commonTemp = getCommonTempToAuth(referenceNo, requestType, actionType, userId);
+		CommonTemp commonTemp = null;
+		try {
+			commonTemp = getCommonTempToAuth(referenceNo, requestType, actionType, userId);
+		} catch (InvalidRequestException e) {
+			commonResponse = new CommonResponseBean();
+			commonResponse.setErrorCode(e.getErrorCode());
+			commonResponse.setReturnCode(HttpStatus.BAD_REQUEST.value());
+			commonResponse.setReturnMessage(e.getMessage());
+			return commonResponse;
+		}
+
 		Boolean isExisting = null != commonTemp.getId() && commonTemp.getId() > 0;
 		buildCommonTemp(commonRequestBean.getCommonTempBean(), commonTemp, userId, userGroup, requestType,
 				ApprovalStatus.PENDING, actionType);

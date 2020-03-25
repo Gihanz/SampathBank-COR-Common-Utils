@@ -23,5 +23,5 @@ public class CommonResponse {
 	private int returnCode;
 	private String returnMessage;
 	private String errorCode;
-	
+
 }
