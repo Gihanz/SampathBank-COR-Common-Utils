@@ -30,4 +30,6 @@ public class ErrorCode {
 	// Network
 	public static final String CREATE_APPROVAL_ERROR = "T421";
 	public static final String FINACLE_REQUEST_ERROR = "T422";
+
+	public static final String CREATE_WORKFLOW_ERROR = "T423";
 }

@@ -10,7 +10,9 @@ import biz.nable.sb.cor.common.exception.InvalidRequestException;
 import biz.nable.sb.cor.common.exception.RecordNotFoundException;
 import biz.nable.sb.cor.common.exception.SystemException;
 import biz.nable.sb.cor.common.request.CreateApprovalRequest;
+import biz.nable.sb.cor.common.request.workflow.CreateWorkflowRequest;
 import biz.nable.sb.cor.common.response.CreateApprovalResponse;
+import biz.nable.sb.cor.common.response.workflow.CreateWorkflowResponse;
 import biz.nable.sb.cor.common.service.impl.CommonConverter;
 import biz.nable.sb.cor.common.utility.ActionTypeEnum;
 import biz.nable.sb.cor.common.utility.ApprovalStatus;
@@ -61,7 +63,7 @@ public class CommonTempComponent {
 	RestTemplate restTemplate;
 
 	@Value("${nable.biz.common.util.approval.service.url}")
-	private String approvalServiceUrl;
+	private String workflowServiceUrl;
 
 	Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -69,8 +71,7 @@ public class CommonTempComponent {
 	MessageSource messageSource;
 
 	@Transactional
-	public CommonResponseBean createCommonTemp(CommonRequestBean commonRequestBean, String requestId,
-			ActionTypeEnum actionType) {
+	public CommonResponseBean createCommonTemp(CommonRequestBean commonRequestBean, String requestId) {
 		try {
 			String log = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(commonRequestBean);
 			logger.info("Start createCommonTemp with Action Type : {} Request : {}", actionType.name(), log);
@@ -80,6 +81,7 @@ public class CommonTempComponent {
 		CommonResponseBean commonResponse;
 		String userId = commonRequestBean.getUserId();
 		String userGroup = commonRequestBean.getUserGroup();
+
 		final String requestType = commonRequestBean.getRequestType();
 
 		String referenceNo = commonRequestBean.getReferenceNo();
@@ -113,10 +115,10 @@ public class CommonTempComponent {
 		commonTempHis.setTempId(commonTemp.getId());
 
 		if (Boolean.FALSE.equals(isExisting)) {
-			CreateApprovalResponse createApprovalResponse = createWorkflow(userId, userGroup, requestId, requestType,
+			CreateWorkflowResponse createWorkflowResponse = createWorkflow(userId, userGroup, requestId, requestType,
 					referenceNo, actionType);
-			commonTemp.setApprovalId(createApprovalResponse.getApprovalBean().getApprovalId());
-			commonTempHis.setApprovalId(createApprovalResponse.getApprovalBean().getApprovalId());
+			commonTemp.setApprovalId(createWorkflowResponse.getWorkflowBean().getApprovalId());
+			commonTempHis.setApprovalId(createWorkflowResponse.getWorkflowBean().getApprovalId());
 
 			commonTemp = commonTempRepository.save(commonTemp);
 			logger.info("Update temp");
@@ -134,41 +136,44 @@ public class CommonTempComponent {
 		return commonResponse;
 	}
 
-	private CreateApprovalResponse createWorkflow(String userId, String userGroup, String requestId, String requestType,
-			String referenceId, ActionTypeEnum actionType) {
-		logger.info("Start send to create approval request");
+	private CreateWorkflowResponse createWorkflow(String userId, String requestType, String referenceId) {
+		logger.info("Start send to create workflow request");
 		HttpHeaders headers = new HttpHeaders();
-		headers.add("request-id", requestId);
 		headers.add("userId", userId);
-		headers.add("userGroup", userGroup);
-		CreateApprovalRequest request = new CreateApprovalRequest();
-		request.setApprovalStatus(ApprovalStatus.PENDING.name());
-		request.setEnteredBy(userId);
-		request.setUserGroup(userGroup);
+		CreateWorkflowRequest request = new CreateWorkflowRequest();
 		request.setReferenceId(referenceId);
-		request.setType(requestType);
-		request.setActionType(actionType.name());
-		request.setEnteredDate(new Date());
+		request.setCompanyId(userId);
+		request.setType(userGroup);
+		request.setSubType(referenceId);
+		request.setDomain(actionType.name());
+		request.setAmount(new Date());
+		request.setCreatedBy(requestType);
+		request.setCreatedDate(requestType);
+		request.setModifiedBy(requestType);
+		request.setModifiedDate(requestType);
+		request.setStatus(requestType);
+		request.setRemarks(requestType);
+		request.setDbaccount(requestType);
 
-		HttpEntity<CreateApprovalRequest> entity = new HttpEntity<>(request, headers);
-		CreateApprovalResponse response = null;
+		HttpEntity<CreateWorkflowRequest> entity = new HttpEntity<>(request, headers);
+		CreateWorkflowResponse response = null;
 		try {
-			String createApprovalUrl = approvalServiceUrl + "/v1/approval";
-			ResponseEntity<CreateApprovalResponse> responseEntity = restTemplate.postForEntity(createApprovalUrl,
-					entity, CreateApprovalResponse.class);
+			String createApprovalUrl = workflowServiceUrl + "/workflow/request";
+			ResponseEntity<CreateWorkflowResponse> responseEntity = restTemplate.postForEntity(createApprovalUrl,
+					entity, CreateWorkflowResponse.class);
 			if (null != responseEntity.getBody()) {
 				response = responseEntity.getBody();
 			} else {
-				logger.error("Create approval request reseved null responce");
-				throw new SystemException(messageSource.getMessage(ErrorCode.CREATE_APPROVAL_ERROR, null,
-						LocaleContextHolder.getLocale()), ErrorCode.CREATE_APPROVAL_ERROR);
+				logger.error("Create workflow request reserved null response");
+				throw new SystemException(messageSource.getMessage(ErrorCode.CREATE_WORKFLOW_ERROR, null,
+						LocaleContextHolder.getLocale()), ErrorCode.CREATE_WORKFLOW_ERROR);
 			}
 		} catch (HttpClientErrorException e) {
-			logger.error("Error occred while creating Approval request: ", e);
-			response = commonConverter.jsonToObject(e.getResponseBodyAsString(), CreateApprovalResponse.class);
+			logger.error("Error occred while creating workflow request: ", e);
+			response = commonConverter.jsonToObject(e.getResponseBodyAsString(), CreateWorkflowResponse.class);
 			throw new SystemException(response.getReturnMessage(), String.valueOf(response.getReturnCode()));
 		}
-		logger.info("End create approval request successfuly");
+		logger.info("End create workflow request successfuly");
 		return response;
 	}
 
