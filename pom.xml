@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>biz.nable.sb.cor.common.utils</groupId>
 	<artifactId>SB_COR_Common-Utils</artifactId>
-	<version>0.0.6-GA</version>
+	<version>0.0.7-GA</version>
 	<packaging>jar</packaging>
 
 	<parent>
