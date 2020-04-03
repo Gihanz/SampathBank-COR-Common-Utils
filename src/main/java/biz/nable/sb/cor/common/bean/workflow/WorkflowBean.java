@@ -23,6 +23,8 @@ import java.util.Date;
 @ToString
 public class WorkflowBean {
 
+	private String workflowId;
+
 	private String referenceId;
 
 	private String companyId;

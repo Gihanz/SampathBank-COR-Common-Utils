@@ -31,5 +31,8 @@ public class ErrorCode {
 	public static final String CREATE_APPROVAL_ERROR = "T421";
 	public static final String FINACLE_REQUEST_ERROR = "T422";
 
-	public static final String CREATE_WORKFLOW_ERROR = "T423";
+	//workflow error codes
+	public static final String NOTHER_PENDING_WORKFLOW_RECORD_FOUND = "WORKFLOW:B4091";
+
+	public static final String CREATE_WORKFLOW_ERROR = "WORKFLOW:T421";
 }

@@ -1,23 +1,19 @@
 package biz.nable.sb.cor.common.service.impl.workflow;
 
-import biz.nable.sb.cor.common.bean.*;
+import biz.nable.sb.cor.common.bean.workflow.*;
 import biz.nable.sb.cor.common.db.criteria.TempCustomRepository;
-import biz.nable.sb.cor.common.db.entity.CommonTemp;
-import biz.nable.sb.cor.common.db.entity.CommonTempHis;
-import biz.nable.sb.cor.common.db.repository.CommonTempHisRepository;
-import biz.nable.sb.cor.common.db.repository.CommonTempRepository;
+import biz.nable.sb.cor.common.db.entity.workflow.CommonTemp;
+import biz.nable.sb.cor.common.db.entity.workflow.CommonTempHis;
+import biz.nable.sb.cor.common.db.repository.workflow.CommonTempHisRepository;
+import biz.nable.sb.cor.common.db.repository.workflow.CommonTempRepository;
 import biz.nable.sb.cor.common.exception.InvalidRequestException;
-import biz.nable.sb.cor.common.exception.RecordNotFoundException;
 import biz.nable.sb.cor.common.exception.SystemException;
-import biz.nable.sb.cor.common.request.CreateApprovalRequest;
 import biz.nable.sb.cor.common.request.workflow.CreateWorkflowRequest;
-import biz.nable.sb.cor.common.response.CreateApprovalResponse;
 import biz.nable.sb.cor.common.response.workflow.CreateWorkflowResponse;
 import biz.nable.sb.cor.common.service.impl.CommonConverter;
-import biz.nable.sb.cor.common.utility.ActionTypeEnum;
-import biz.nable.sb.cor.common.utility.ApprovalStatus;
 import biz.nable.sb.cor.common.utility.ErrorCode;
 import biz.nable.sb.cor.common.utility.SignatureComponent;
+import biz.nable.sb.cor.common.utility.workflow.WorkflowStatus;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.beanutils.BeanUtils;
@@ -37,17 +33,15 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.transaction.Transactional;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 
 @Component
 public class CommonTempComponent {
 	@Autowired
-	CommonTempRepository commonTempRepository;
+    CommonTempRepository commonTempRepository;
 	@Autowired
-	CommonTempHisRepository commonTempHisRepository;
+    CommonTempHisRepository commonTempHisRepository;
 	@Autowired
 	ObjectMapper objectMapper;
 	@Autowired
@@ -74,23 +68,21 @@ public class CommonTempComponent {
 	public CommonResponseBean createCommonTemp(CommonRequestBean commonRequestBean, String requestId) {
 		try {
 			String log = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(commonRequestBean);
-			logger.info("Start createCommonTemp with Action Type : {} Request : {}", actionType.name(), log);
+			logger.info("Start createCommonTemp for create workflow Request : {}", log);
 		} catch (JsonProcessingException e) {
 			logger.error("commonTemp Json parser error {}", e);
 		}
 		CommonResponseBean commonResponse;
 		String userId = commonRequestBean.getUserId();
-		String userGroup = commonRequestBean.getUserGroup();
+		final String type = commonRequestBean.getType();
+		String referenceNo = commonRequestBean.getReferenceId();
 
-		final String requestType = commonRequestBean.getRequestType();
-
-		String referenceNo = commonRequestBean.getReferenceNo();
-
-		CommonTemp commonTemp = getCommonTempToAuth(referenceNo, requestType, actionType, userId);
+		CommonTemp commonTemp = getCommonTempToWorkflowCreation(referenceNo, type, userId);
 		Boolean isExisting = null != commonTemp.getId() && commonTemp.getId() > 0;
-		buildCommonTemp(commonRequestBean.getCommonTempBean(), commonTemp, userId, userGroup, requestType,
-				ApprovalStatus.PENDING, actionType);
+
+		buildCommonTemp(commonRequestBean.getCommonTempBean(), commonTemp, userId, type, WorkflowStatus.PENDING);
 		CommonTempHis commonTempHis = new CommonTempHis();
+
 		try {
 			String log = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(commonTemp);
 			logger.info("save to commonTemp: {}", log);
@@ -107,7 +99,7 @@ public class CommonTempComponent {
 		}
 		String hashTags = commonRequestBean.getHashTags();
 		referenceNo = null == referenceNo ? String.valueOf(commonTemp.getId()) : referenceNo;
-		commonTemp.setReferenceNo(referenceNo);
+		commonTemp.setReferenceId(referenceNo);
 		commonTemp.setHashTags(hashTags);
 		commonTemp = commonTempRepository.save(commonTemp);
 		logger.info("saved to db");
@@ -115,10 +107,9 @@ public class CommonTempComponent {
 		commonTempHis.setTempId(commonTemp.getId());
 
 		if (Boolean.FALSE.equals(isExisting)) {
-			CreateWorkflowResponse createWorkflowResponse = createWorkflow(userId, userGroup, requestId, requestType,
-					referenceNo, actionType);
-			commonTemp.setApprovalId(createWorkflowResponse.getWorkflowBean().getApprovalId());
-			commonTempHis.setApprovalId(createWorkflowResponse.getWorkflowBean().getApprovalId());
+			CreateWorkflowResponse createWorkflowResponse = createWorkflow(commonRequestBean);
+			commonTemp.setWorkflowId(createWorkflowResponse.getWorkflowBean().getWorkflowId());
+			commonTempHis.setWorkflowId(createWorkflowResponse.getWorkflowBean().getWorkflowId());
 
 			commonTemp = commonTempRepository.save(commonTemp);
 			logger.info("Update temp");
@@ -132,28 +123,28 @@ public class CommonTempComponent {
 				messageSource.getMessage(ErrorCode.OPARATION_SUCCESS, null, LocaleContextHolder.getLocale()));
 		commonResponse.setCommonTempBean(commonRequestBean.getCommonTempBean());
 		commonResponse.setTempId(String.valueOf(commonTemp.getId()));
-		commonResponse.setApprovalId(commonTemp.getApprovalId());
+		commonResponse.setWorkflowId(commonTemp.getWorkflowId());
 		return commonResponse;
 	}
 
-	private CreateWorkflowResponse createWorkflow(String userId, String requestType, String referenceId) {
+	private CreateWorkflowResponse createWorkflow(CommonRequestBean commonRequestBean) {
 		logger.info("Start send to create workflow request");
 		HttpHeaders headers = new HttpHeaders();
-		headers.add("userId", userId);
+		headers.add("userId", commonRequestBean.getUserId());
 		CreateWorkflowRequest request = new CreateWorkflowRequest();
-		request.setReferenceId(referenceId);
-		request.setCompanyId(userId);
-		request.setType(userGroup);
-		request.setSubType(referenceId);
-		request.setDomain(actionType.name());
-		request.setAmount(new Date());
-		request.setCreatedBy(requestType);
-		request.setCreatedDate(requestType);
-		request.setModifiedBy(requestType);
-		request.setModifiedDate(requestType);
-		request.setStatus(requestType);
-		request.setRemarks(requestType);
-		request.setDbaccount(requestType);
+		request.setReferenceId(commonRequestBean.getReferenceId());
+		request.setCompanyId(commonRequestBean.getCompanyId());
+		request.setType(commonRequestBean.getType());
+		request.setSubType(commonRequestBean.getSubType());
+		request.setDomain(commonRequestBean.getDomain());
+		request.setAmount(commonRequestBean.getAmount());
+		request.setCreatedBy(commonRequestBean.getUserId());
+		request.setCreatedDate(new Date());
+		request.setModifiedBy(commonRequestBean.getModifiedBy());
+		request.setModifiedDate(commonRequestBean.getModifiedDate());
+		request.setStatus(commonRequestBean.getStatus());
+		request.setRemarks(commonRequestBean.getRemarks());
+		request.setDbaccount(commonRequestBean.getDbaccount());
 
 		HttpEntity<CreateWorkflowRequest> entity = new HttpEntity<>(request, headers);
 		CreateWorkflowResponse response = null;
@@ -178,16 +169,38 @@ public class CommonTempComponent {
 	}
 
 	private CommonTemp buildCommonTemp(CommonTempBean createCommonRequest, CommonTemp commonTemp, String userId,
-			String userGroup, String requestType, ApprovalStatus status, ActionTypeEnum actionType) {
+			 String type, WorkflowStatus status) {
 
-		commonTemp.setRequestType(requestType);
+		commonTemp.setType(type);
 		commonTemp.setCreatedBy(userId);
 		commonTemp.setCreatedDate(new Date());
 		commonTemp.setLastUpdatedBy(userId);
 		commonTemp.setStatus(status);
-		commonTemp.setActionType(actionType);
 		commonTemp.setRequestPayload(commonConverter.pojoToMap(createCommonRequest));
-		commonTemp.setUserGroup(userGroup);
 		return commonTemp;
 	}
+
+    private CommonTemp getCommonTempToWorkflowCreation(String referenceNo, String type, String userId) {
+        Optional<CommonTemp> optional = commonTempRepository.findByReferenceIdAndTypeAndStatus(referenceNo,type, WorkflowStatus.PENDING);
+        CommonTemp commonTemp;
+        if (optional.isPresent()) {
+            commonTemp = optional.get();
+            if (!type.equals(commonTemp.getType())) {
+                logger.info(messageSource.getMessage(ErrorCode.NOTHER_PENDING_WORKFLOW_RECORD_FOUND, null,
+                        LocaleContextHolder.getLocale()));
+                throw new InvalidRequestException(
+                        messageSource.getMessage(ErrorCode.NOTHER_PENDING_WORKFLOW_RECORD_FOUND, null,
+                                LocaleContextHolder.getLocale()),
+                        ErrorCode.NOTHER_PENDING_WORKFLOW_RECORD_FOUND);
+            } else if (!userId.equals(commonTemp.getCreatedBy())) {
+                throw new InvalidRequestException(
+                        messageSource.getMessage(ErrorCode.USER_NOT_PERMITTED, null, LocaleContextHolder.getLocale()),
+                        ErrorCode.USER_NOT_PERMITTED);
+            }
+        } else {
+            commonTemp = new CommonTemp();
+        }
+
+        return commonTemp;
+    }
 }

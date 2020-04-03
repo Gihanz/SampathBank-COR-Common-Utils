@@ -23,9 +23,6 @@ public class CreateWorkflowResponse extends CommonResponse {
 
 	private WorkflowBean workflowBean;
 
-	public CreateWorkflowResponse(){
-
-	}
 	public CreateWorkflowResponse(int returnCode, String returnMessage, String errorCode, WorkflowBean workflowBean) {
 		super(returnCode, returnMessage, errorCode);
 		this.workflowBean = workflowBean;

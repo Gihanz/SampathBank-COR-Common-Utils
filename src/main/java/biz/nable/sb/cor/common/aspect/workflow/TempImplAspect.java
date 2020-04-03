@@ -3,9 +3,9 @@
  *******************************************************************************/
 package biz.nable.sb.cor.common.aspect.workflow;
 
-import biz.nable.sb.cor.common.annotation.TempRecord;
-import biz.nable.sb.cor.common.bean.CommonRequestBean;
-import biz.nable.sb.cor.common.bean.CommonResponseBean;
+import biz.nable.sb.cor.common.annotation.workflow.TempRecord;
+import biz.nable.sb.cor.common.bean.workflow.CommonRequestBean;
+import biz.nable.sb.cor.common.bean.workflow.CommonResponseBean;
 import biz.nable.sb.cor.common.service.impl.workflow.CommonTempComponent;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

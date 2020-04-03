@@ -15,20 +15,13 @@ import lombok.*;
 
 @Getter
 @Setter
-@Data
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
 public class CommonResponse {
 
 	private int returnCode;
-
 	private String returnMessage;
-
-	@JsonInclude(Include.NON_NULL)
 	private String errorCode;
-
-	@JsonInclude(Include.NON_NULL)
-	private String errorMessage;
 
 }
