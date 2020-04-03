@@ -56,7 +56,7 @@ public class CommonTempComponent {
 	@Autowired
 	RestTemplate restTemplate;
 
-	@Value("${nable.biz.common.util.approval.service.url}")
+	@Value("${nable.biz.common.util.workflow.service.url}")
 	private String workflowServiceUrl;
 
 	Logger logger = LoggerFactory.getLogger(this.getClass());
