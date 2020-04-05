@@ -6,7 +6,7 @@ package biz.nable.sb.cor.common.aspect.workflow;
 import biz.nable.sb.cor.common.annotation.workflow.TempRecord;
 import biz.nable.sb.cor.common.bean.workflow.CommonRequestBean;
 import biz.nable.sb.cor.common.bean.workflow.CommonResponseBean;
-import biz.nable.sb.cor.common.service.impl.workflow.CommonTempComponent;
+import biz.nable.sb.cor.common.service.impl.workflow.CommonTempComponentWorkflow;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -29,7 +29,7 @@ public class TempImplAspect {
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired
-	CommonTempComponent commonTempComponent;
+	CommonTempComponentWorkflow commonTempComponent;
 
 	@Around(value = "@annotation(tempRecord)")
 	public Object around(ProceedingJoinPoint joinPoint, TempRecord tempRecord) throws Throwable {
