@@ -37,7 +37,7 @@ import java.util.Date;
 import java.util.Optional;
 
 @Component
-public class CommonTempComponentWorkflow {
+public class CommonTempComponent {
 	@Autowired
     CommonTempRepository commonTempRepository;
 	@Autowired
