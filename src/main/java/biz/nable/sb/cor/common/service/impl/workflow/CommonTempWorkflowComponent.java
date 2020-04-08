@@ -80,7 +80,7 @@ public class CommonTempWorkflowComponent {
 		CommonTempWorkflow commonTempWorkflow = getCommonTempToWorkflowCreation(referenceNo, type, userId);
 		Boolean isExisting = null != commonTempWorkflow.getId() && commonTempWorkflow.getId() > 0;
 
-		buildCommonTemp(commonRequestWorkflowBean.getCommonTempBean(), commonTempWorkflow, userId, type, WorkflowStatus.PENDING);
+		buildCommonTemp(commonRequestWorkflowBean.getCommonTempWorkflowBean(), commonTempWorkflow, userId, type, WorkflowStatus.PENDING);
 		CommonTempWorkflowHis commonTempWorkflowHis = new CommonTempWorkflowHis();
 
 		try {
@@ -121,7 +121,7 @@ public class CommonTempWorkflowComponent {
 		commonResponse.setReturnCode(HttpStatus.OK.value());
 		commonResponse.setReturnMessage(
 				messageSource.getMessage(ErrorCode.OPARATION_SUCCESS, null, LocaleContextHolder.getLocale()));
-		commonResponse.setCommonTempBean(commonRequestWorkflowBean.getCommonTempBean());
+		commonResponse.setCommonTempWorkflowBean(commonRequestWorkflowBean.getCommonTempWorkflowBean());
 		commonResponse.setTempId(String.valueOf(commonTempWorkflow.getId()));
 		commonResponse.setWorkflowId(commonTempWorkflow.getWorkflowId());
 		return commonResponse;
