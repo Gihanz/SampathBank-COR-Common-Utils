@@ -19,7 +19,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * @author shehan
  *
  */
-public @interface TempRecord {
+public @interface TempRecordWorkflow {
 
 
 }

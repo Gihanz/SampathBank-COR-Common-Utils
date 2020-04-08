@@ -8,9 +8,9 @@ import java.util.Date;
 
 @Getter
 @Setter
-public class CommonRequestBean {
+public class CommonRequestWorkflowBean {
 
-	private CommonTempBean commonTempBean;
+	private CommonTempWorkflowBean commonTempWorkflowBean;
 	private String userId;
 	private String referenceId;
 	private String companyId;

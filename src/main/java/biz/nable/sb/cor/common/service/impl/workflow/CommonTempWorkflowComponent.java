@@ -2,10 +2,10 @@ package biz.nable.sb.cor.common.service.impl.workflow;
 
 import biz.nable.sb.cor.common.bean.workflow.*;
 import biz.nable.sb.cor.common.db.criteria.TempCustomRepository;
-import biz.nable.sb.cor.common.db.entity.workflow.CommonTemp;
-import biz.nable.sb.cor.common.db.entity.workflow.CommonTempHis;
-import biz.nable.sb.cor.common.db.repository.workflow.CommonTempHisRepository;
-import biz.nable.sb.cor.common.db.repository.workflow.CommonTempRepository;
+import biz.nable.sb.cor.common.db.entity.workflow.CommonTempWorkflow;
+import biz.nable.sb.cor.common.db.entity.workflow.CommonTempWorkflowHis;
+import biz.nable.sb.cor.common.db.repository.workflow.CommonTempHisWorkflowRepository;
+import biz.nable.sb.cor.common.db.repository.workflow.CommonTempWorkflowRepository;
 import biz.nable.sb.cor.common.exception.InvalidRequestException;
 import biz.nable.sb.cor.common.exception.SystemException;
 import biz.nable.sb.cor.common.request.workflow.CreateWorkflowRequest;
@@ -37,11 +37,11 @@ import java.util.Date;
 import java.util.Optional;
 
 @Component
-public class CommonTempComponent {
+public class CommonTempWorkflowComponent {
 	@Autowired
-    CommonTempRepository commonTempRepository;
+    CommonTempWorkflowRepository commonTempWorkflowRepository;
 	@Autowired
-    CommonTempHisRepository commonTempHisRepository;
+    CommonTempHisWorkflowRepository commonTempHisWorkflowRepository;
 	@Autowired
 	ObjectMapper objectMapper;
 	@Autowired
@@ -65,86 +65,86 @@ public class CommonTempComponent {
 	MessageSource messageSource;
 
 	@Transactional
-	public CommonResponseBean createCommonTemp(CommonRequestBean commonRequestBean, String requestId) {
+	public CommonResponseWorkflowBean createCommonTemp(CommonRequestWorkflowBean commonRequestWorkflowBean, String requestId) {
 		try {
-			String log = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(commonRequestBean);
+			String log = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(commonRequestWorkflowBean);
 			logger.info("Start createCommonTemp for create workflow Request : {}", log);
 		} catch (JsonProcessingException e) {
-			logger.error("commonTemp Json parser error {}", e);
+			logger.error("commonTempWorkflow Json parser error {}", e);
 		}
-		CommonResponseBean commonResponse;
-		String userId = commonRequestBean.getUserId();
-		final String type = commonRequestBean.getType();
-		String referenceNo = commonRequestBean.getReferenceId();
+		CommonResponseWorkflowBean commonResponse;
+		String userId = commonRequestWorkflowBean.getUserId();
+		final String type = commonRequestWorkflowBean.getType();
+		String referenceNo = commonRequestWorkflowBean.getReferenceId();
 
-		CommonTemp commonTemp = getCommonTempToWorkflowCreation(referenceNo, type, userId);
-		Boolean isExisting = null != commonTemp.getId() && commonTemp.getId() > 0;
+		CommonTempWorkflow commonTempWorkflow = getCommonTempToWorkflowCreation(referenceNo, type, userId);
+		Boolean isExisting = null != commonTempWorkflow.getId() && commonTempWorkflow.getId() > 0;
 
-		buildCommonTemp(commonRequestBean.getCommonTempBean(), commonTemp, userId, type, WorkflowStatus.PENDING);
-		CommonTempHis commonTempHis = new CommonTempHis();
+		buildCommonTemp(commonRequestWorkflowBean.getCommonTempBean(), commonTempWorkflow, userId, type, WorkflowStatus.PENDING);
+		CommonTempWorkflowHis commonTempWorkflowHis = new CommonTempWorkflowHis();
 
 		try {
-			String log = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(commonTemp);
-			logger.info("save to commonTemp: {}", log);
+			String log = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(commonTempWorkflow);
+			logger.info("save to commonTempWorkflow: {}", log);
 		} catch (JsonProcessingException e) {
-			logger.error("commonTemp Json parser error {}", e);
+			logger.error("commonTempWorkflow Json parser error {}", e);
 		}
 		try {
-			BeanUtils.copyProperties(commonTempHis, commonTemp);
+			BeanUtils.copyProperties(commonTempWorkflowHis, commonTempWorkflow);
 		} catch (IllegalAccessException | InvocationTargetException e) {
-			logger.error("CommonTemp to CommonTempHis data mapping error {}", e);
+			logger.error("CommonTempWorkflow to CommonTempWorkflowHis data mapping error {}", e);
 			throw new SystemException(
 					messageSource.getMessage(ErrorCode.DATA_COPY_ERROR, null, LocaleContextHolder.getLocale()),
 					ErrorCode.DATA_COPY_ERROR);
 		}
-		String hashTags = commonRequestBean.getHashTags();
-		referenceNo = null == referenceNo ? String.valueOf(commonTemp.getId()) : referenceNo;
-		commonTemp.setReferenceId(referenceNo);
-		commonTemp.setHashTags(hashTags);
-		commonTemp = commonTempRepository.save(commonTemp);
+		String hashTags = commonRequestWorkflowBean.getHashTags();
+		referenceNo = null == referenceNo ? String.valueOf(commonTempWorkflow.getId()) : referenceNo;
+		commonTempWorkflow.setReferenceId(referenceNo);
+		commonTempWorkflow.setHashTags(hashTags);
+		commonTempWorkflow = commonTempWorkflowRepository.save(commonTempWorkflow);
 		logger.info("saved to db");
 
-		commonTempHis.setTempId(commonTemp.getId());
+		commonTempWorkflowHis.setTempId(commonTempWorkflow.getId());
 
 		if (Boolean.FALSE.equals(isExisting)) {
-			CreateWorkflowResponse createWorkflowResponse = createWorkflow(commonRequestBean);
-			commonTemp.setWorkflowId(createWorkflowResponse.getWorkflowBean().getWorkflowId());
-			commonTempHis.setWorkflowId(createWorkflowResponse.getWorkflowBean().getWorkflowId());
+			CreateWorkflowResponse createWorkflowResponse = createWorkflow(commonRequestWorkflowBean);
+			commonTempWorkflow.setWorkflowId(createWorkflowResponse.getWorkflowBean().getWorkflowId());
+			commonTempWorkflowHis.setWorkflowId(createWorkflowResponse.getWorkflowBean().getWorkflowId());
 
-			commonTemp = commonTempRepository.save(commonTemp);
+			commonTempWorkflow = commonTempWorkflowRepository.save(commonTempWorkflow);
 			logger.info("Update temp");
 		}
-		commonTempHisRepository.save(commonTempHis);
+		commonTempHisWorkflowRepository.save(commonTempWorkflowHis);
 		logger.info("save to history");
-		commonResponse = new CommonResponseBean();
+		commonResponse = new CommonResponseWorkflowBean();
 		commonResponse.setErrorCode(ErrorCode.OPARATION_SUCCESS);
 		commonResponse.setReturnCode(HttpStatus.OK.value());
 		commonResponse.setReturnMessage(
 				messageSource.getMessage(ErrorCode.OPARATION_SUCCESS, null, LocaleContextHolder.getLocale()));
-		commonResponse.setCommonTempBean(commonRequestBean.getCommonTempBean());
-		commonResponse.setTempId(String.valueOf(commonTemp.getId()));
-		commonResponse.setWorkflowId(commonTemp.getWorkflowId());
+		commonResponse.setCommonTempBean(commonRequestWorkflowBean.getCommonTempBean());
+		commonResponse.setTempId(String.valueOf(commonTempWorkflow.getId()));
+		commonResponse.setWorkflowId(commonTempWorkflow.getWorkflowId());
 		return commonResponse;
 	}
 
-	private CreateWorkflowResponse createWorkflow(CommonRequestBean commonRequestBean) {
+	private CreateWorkflowResponse createWorkflow(CommonRequestWorkflowBean commonRequestWorkflowBean) {
 		logger.info("Start send to create workflow request");
 		HttpHeaders headers = new HttpHeaders();
-		headers.add("userId", commonRequestBean.getUserId());
+		headers.add("userId", commonRequestWorkflowBean.getUserId());
 		CreateWorkflowRequest request = new CreateWorkflowRequest();
-		request.setReferenceId(commonRequestBean.getReferenceId());
-		request.setCompanyId(commonRequestBean.getCompanyId());
-		request.setType(commonRequestBean.getType());
-		request.setSubType(commonRequestBean.getSubType());
-		request.setDomain(commonRequestBean.getDomain());
-		request.setAmount(commonRequestBean.getAmount());
-		request.setCreatedBy(commonRequestBean.getUserId());
+		request.setReferenceId(commonRequestWorkflowBean.getReferenceId());
+		request.setCompanyId(commonRequestWorkflowBean.getCompanyId());
+		request.setType(commonRequestWorkflowBean.getType());
+		request.setSubType(commonRequestWorkflowBean.getSubType());
+		request.setDomain(commonRequestWorkflowBean.getDomain());
+		request.setAmount(commonRequestWorkflowBean.getAmount());
+		request.setCreatedBy(commonRequestWorkflowBean.getUserId());
 		request.setCreatedDate(new Date());
-		request.setModifiedBy(commonRequestBean.getModifiedBy());
-		request.setModifiedDate(commonRequestBean.getModifiedDate());
-		request.setStatus(commonRequestBean.getStatus());
-		request.setRemarks(commonRequestBean.getRemarks());
-		request.setDbaccount(commonRequestBean.getDbaccount());
+		request.setModifiedBy(commonRequestWorkflowBean.getModifiedBy());
+		request.setModifiedDate(commonRequestWorkflowBean.getModifiedDate());
+		request.setStatus(commonRequestWorkflowBean.getStatus());
+		request.setRemarks(commonRequestWorkflowBean.getRemarks());
+		request.setDbaccount(commonRequestWorkflowBean.getDbaccount());
 
 		HttpEntity<CreateWorkflowRequest> entity = new HttpEntity<>(request, headers);
 		CreateWorkflowResponse response = null;
@@ -168,39 +168,39 @@ public class CommonTempComponent {
 		return response;
 	}
 
-	private CommonTemp buildCommonTemp(CommonTempBean createCommonRequest, CommonTemp commonTemp, String userId,
-			 String type, WorkflowStatus status) {
+	private CommonTempWorkflow buildCommonTemp(CommonTempWorkflowBean createCommonRequest, CommonTempWorkflow commonTempWorkflow, String userId,
+                                               String type, WorkflowStatus status) {
 
-		commonTemp.setType(type);
-		commonTemp.setCreatedBy(userId);
-		commonTemp.setCreatedDate(new Date());
-		commonTemp.setLastUpdatedBy(userId);
-		commonTemp.setStatus(status);
-		commonTemp.setRequestPayload(commonConverter.pojoToMap(createCommonRequest));
-		return commonTemp;
+		commonTempWorkflow.setType(type);
+		commonTempWorkflow.setCreatedBy(userId);
+		commonTempWorkflow.setCreatedDate(new Date());
+		commonTempWorkflow.setLastUpdatedBy(userId);
+		commonTempWorkflow.setStatus(status);
+		commonTempWorkflow.setRequestPayload(commonConverter.pojoToMap(createCommonRequest));
+		return commonTempWorkflow;
 	}
 
-    private CommonTemp getCommonTempToWorkflowCreation(String referenceNo, String type, String userId) {
-        Optional<CommonTemp> optional = commonTempRepository.findByReferenceIdAndTypeAndStatus(referenceNo,type, WorkflowStatus.PENDING);
-        CommonTemp commonTemp;
+    private CommonTempWorkflow getCommonTempToWorkflowCreation(String referenceNo, String type, String userId) {
+        Optional<CommonTempWorkflow> optional = commonTempWorkflowRepository.findByReferenceIdAndTypeAndStatus(referenceNo,type, WorkflowStatus.PENDING);
+        CommonTempWorkflow commonTempWorkflow;
         if (optional.isPresent()) {
-            commonTemp = optional.get();
-            if (!type.equals(commonTemp.getType())) {
+            commonTempWorkflow = optional.get();
+            if (!type.equals(commonTempWorkflow.getType())) {
                 logger.info(messageSource.getMessage(ErrorCode.NOTHER_PENDING_WORKFLOW_RECORD_FOUND, null,
                         LocaleContextHolder.getLocale()));
                 throw new InvalidRequestException(
                         messageSource.getMessage(ErrorCode.NOTHER_PENDING_WORKFLOW_RECORD_FOUND, null,
                                 LocaleContextHolder.getLocale()),
                         ErrorCode.NOTHER_PENDING_WORKFLOW_RECORD_FOUND);
-            } else if (!userId.equals(commonTemp.getCreatedBy())) {
+            } else if (!userId.equals(commonTempWorkflow.getCreatedBy())) {
                 throw new InvalidRequestException(
                         messageSource.getMessage(ErrorCode.USER_NOT_PERMITTED, null, LocaleContextHolder.getLocale()),
                         ErrorCode.USER_NOT_PERMITTED);
             }
         } else {
-            commonTemp = new CommonTemp();
+            commonTempWorkflow = new CommonTempWorkflow();
         }
 
-        return commonTemp;
+        return commonTempWorkflow;
     }
 }

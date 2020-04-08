@@ -3,10 +3,10 @@
  *******************************************************************************/
 package biz.nable.sb.cor.common.aspect.workflow;
 
-import biz.nable.sb.cor.common.annotation.workflow.TempRecord;
-import biz.nable.sb.cor.common.bean.workflow.CommonRequestBean;
-import biz.nable.sb.cor.common.bean.workflow.CommonResponseBean;
-import biz.nable.sb.cor.common.service.impl.workflow.CommonTempComponent;
+import biz.nable.sb.cor.common.annotation.workflow.TempRecordWorkflow;
+import biz.nable.sb.cor.common.bean.workflow.CommonRequestWorkflowBean;
+import biz.nable.sb.cor.common.bean.workflow.CommonResponseWorkflowBean;
+import biz.nable.sb.cor.common.service.impl.workflow.CommonTempWorkflowComponent;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -24,25 +24,25 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Order(2)
 @Component
-public class TempImplAspect {
+public class TempImplWorkflowAspect {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired
-	CommonTempComponent commonTempComponent;
+	CommonTempWorkflowComponent commonTempWorkflowComponent;
 
-	@Around(value = "@annotation(tempRecord)")
-	public Object around(ProceedingJoinPoint joinPoint, TempRecord tempRecord) throws Throwable {
-		logger.info("Start TempRecord Annotation");
+	@Around(value = "@annotation(tempRecordWorkflow)")
+	public Object around(ProceedingJoinPoint joinPoint, TempRecordWorkflow tempRecordWorkflow) throws Throwable {
+		logger.info("Start TempRecordWorkflow Annotation");
 		Object result = joinPoint.proceed(joinPoint.getArgs());
-		if (((CommonResponseBean) result).getReturnCode() != HttpStatus.OK.value()) {
+		if (((CommonResponseWorkflowBean) result).getReturnCode() != HttpStatus.OK.value()) {
 			return result;
 		}
 		Object[] args = joinPoint.getArgs();
 
-		CommonRequestBean commonRequestBean = (CommonRequestBean) args[0];
+		CommonRequestWorkflowBean commonRequestWorkflowBean = (CommonRequestWorkflowBean) args[0];
 		String requestId = (String) args[1];
-		return commonTempComponent.createCommonTemp(commonRequestBean, requestId);
+		return commonTempWorkflowComponent.createCommonTemp(commonRequestWorkflowBean, requestId);
 	}
 
 }
