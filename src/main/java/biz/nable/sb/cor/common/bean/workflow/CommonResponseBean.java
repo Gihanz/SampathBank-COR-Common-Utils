@@ -1,6 +1,6 @@
 package biz.nable.sb.cor.common.bean.workflow;
 
-import biz.nable.sb.cor.common.response.workflow.CommonResponse;
+import biz.nable.sb.cor.common.response.CommonResponse;
 import lombok.Getter;
 import lombok.Setter;
 
