@@ -6,8 +6,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CommonResponseBean extends CommonResponse {
-	private CommonTempBean commonTempBean;
+public class CommonResponseWorkflowBean extends CommonResponse {
+	private CommonTempWorkflowBean commonTempWorkflowBean;
 	private String tempId;
 	private String workflowId;
 }

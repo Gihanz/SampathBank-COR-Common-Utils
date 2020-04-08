@@ -1,6 +1,6 @@
 package biz.nable.sb.cor.common.db.entity.workflow;
 
-import biz.nable.sb.cor.common.db.audit.workflow.Auditable;
+import biz.nable.sb.cor.common.db.audit.workflow.AuditableWorkflow;
 import biz.nable.sb.cor.common.utility.HashMapConverter;
 import biz.nable.sb.cor.common.utility.workflow.WorkflowStatus;
 import lombok.Getter;
@@ -15,7 +15,7 @@ import java.util.Map;
 @ToString
 @Entity
 @Table(name = "SB_COR_COMMON_TEMP_WORKFLOW")
-public class CommonTemp extends Auditable {
+public class CommonTempWorkflow extends AuditableWorkflow {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "COMMON_TEMP_WORKFLOW_SEQ")
 	@SequenceGenerator(name = "COMMON_TEMP_WORKFLOW_SEQ", sequenceName = "SB_COR_COMMON_TEMP_WORKFLOW_SEQ", allocationSize = 1)
