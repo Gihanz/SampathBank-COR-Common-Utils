@@ -11,11 +11,11 @@ import java.util.List;
 public class CommonSearchBean implements SearchCriteriaObject {
 	private String referenceNo;
 	private String userId;
-	private String userGroup;
 	private String hashTags;
 	private String tempId;
 	private String status;
-	private String requestType;
+	private String type;
+	private String companyId;
 
 	@JsonIgnore
 	private List<TempDto> tempList;

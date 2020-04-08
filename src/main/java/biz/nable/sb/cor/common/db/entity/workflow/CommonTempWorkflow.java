@@ -25,6 +25,8 @@ public class CommonTempWorkflow extends AuditableWorkflow {
 	private String hashTags;
 	private WorkflowStatus status;
 	private String type;
+	private String companyId;
+
 	@Convert(converter = HashMapConverter.class)
 	@Column(length = 4000)
 	private Map<String, Object> requestPayload;

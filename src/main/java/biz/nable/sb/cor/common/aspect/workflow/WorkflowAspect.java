@@ -4,7 +4,7 @@
 package biz.nable.sb.cor.common.aspect.workflow;
 
 import biz.nable.sb.cor.common.bean.workflow.CommonSearchBean;
-import biz.nable.sb.cor.common.service.impl.workflow.ApprovalComponent;
+import biz.nable.sb.cor.common.service.impl.workflow.WorkflowComponent;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -21,22 +21,22 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Order(3)
 @Component
-public class AssignDetailsAspect {
+public class WorkflowAspect {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired
-	ApprovalComponent approvalComponent;
+    WorkflowComponent workflowComponent;
 
-	@Around(value = "@annotation(biz.nable.sb.cor.common.annotation.workflow.AssignDetails)")
+	@Around(value = "@annotation(biz.nable.sb.cor.common.annotation.workflow.WorkflowDetails)")
 	public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
-		logger.info("Start AssignDetails annotation");
+		logger.info("Start WorkflowDetails annotation");
 		joinPoint.proceed(joinPoint.getArgs());
 
 		Object[] args = joinPoint.getArgs();
 		CommonSearchBean commonSearchBean = (CommonSearchBean) args[0];
 
-		return approvalComponent.getAssignsDetails(commonSearchBean);
+		return workflowComponent.getWorkflowDetails(commonSearchBean);
 	}
 
 }

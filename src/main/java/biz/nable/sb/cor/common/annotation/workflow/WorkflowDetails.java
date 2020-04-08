@@ -17,6 +17,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * @author Shehan
  *
  */
-public @interface AssignDetails {
+public @interface WorkflowDetails {
 
 }

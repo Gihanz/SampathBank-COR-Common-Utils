@@ -1,8 +1,8 @@
 package biz.nable.sb.cor.common.db.criteria.workflow;
 
 import biz.nable.sb.cor.common.bean.workflow.CommonSearchBean;
-import biz.nable.sb.cor.common.db.entity.workflow.CommonTemp;
-import biz.nable.sb.cor.common.db.repository.workflow.CommonTempRepository;
+import biz.nable.sb.cor.common.db.entity.workflow.CommonTempWorkflow;
+import biz.nable.sb.cor.common.db.repository.workflow.CommonTempWorkflowRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,14 +17,15 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class TempCustomRepository {
+public class TempCustomWorkflowRepository {
 
 	@Autowired
-    CommonTempRepository commonTempRepository;
+	CommonTempWorkflowRepository commonTempRepository;
 
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -36,24 +37,23 @@ public class TempCustomRepository {
 	@Autowired
 	MessageSource messageSource;
 
-	public List<CommonTemp> findTempRecordList(CommonSearchBean searchBean) {
+	public List<CommonTempWorkflow> findTempRecordList(CommonSearchBean searchBean) {
 		logger.info("Start create findAssignList criteria");
-		return commonTempRepository.findAll(new Specification<CommonTemp>() {
+		return commonTempRepository.findAll(new Specification<CommonTempWorkflow>() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public Predicate toPredicate(Root<CommonTemp> root, CriteriaQuery<?> query,
+			public Predicate toPredicate(Root<CommonTempWorkflow> root, CriteriaQuery<?> query,
 					CriteriaBuilder criteriaBuilder) {
 
 				List<Predicate> predicates = new ArrayList<>();
 				referenceNoCriteriaBuilder(predicates, criteriaBuilder, root, searchBean);
-				requestTypeCriteriaBuilder(predicates, criteriaBuilder, root, searchBean);
-				actionTypeCriteriaBuilder(predicates, criteriaBuilder, root, searchBean);
-				userGroupCriteriaBuilder(predicates, criteriaBuilder, root, searchBean);
+				workflowTypeCriteriaBuilder(predicates, criteriaBuilder, root, searchBean);
 				userIdCriteriaBuilder(predicates, criteriaBuilder, root, searchBean);
 				hashTagsCriteriaBuilder(predicates, criteriaBuilder, root, searchBean);
 				statusCriteriaBuilder(predicates, criteriaBuilder, root, searchBean);
+				companyIdCriteriaBuilder(predicates, criteriaBuilder, root, searchBean);
 
 				return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
 			}
@@ -62,39 +62,23 @@ public class TempCustomRepository {
 	}
 
 	private void referenceNoCriteriaBuilder(List<Predicate> predicates, CriteriaBuilder criteriaBuilder,
-			Root<CommonTemp> root, CommonSearchBean commonSearchBean) {
+			Root<CommonTempWorkflow> root, CommonSearchBean commonSearchBean) {
 		if (null != commonSearchBean.getReferenceNo() && !commonSearchBean.getReferenceNo().isEmpty()) {
 			predicates.add(criteriaBuilder
 					.and(criteriaBuilder.equal(root.get("referenceNo"), commonSearchBean.getReferenceNo())));
 		}
 	}
 
-	private void requestTypeCriteriaBuilder(List<Predicate> predicates, CriteriaBuilder criteriaBuilder,
-			Root<CommonTemp> root, CommonSearchBean commonSearchBean) {
-		if (null != commonSearchBean.getRequestType() && !commonSearchBean.getRequestType().isEmpty()) {
+	private void workflowTypeCriteriaBuilder(List<Predicate> predicates, CriteriaBuilder criteriaBuilder,
+											 Root<CommonTempWorkflow> root, CommonSearchBean commonSearchBean) {
+		if (null != commonSearchBean.getType() && !commonSearchBean.getType().isEmpty()) {
 			predicates.add(criteriaBuilder
-					.and(criteriaBuilder.equal(root.get("requestType"), commonSearchBean.getRequestType())));
-		}
-	}
-
-	private void actionTypeCriteriaBuilder(List<Predicate> predicates, CriteriaBuilder criteriaBuilder,
-			Root<CommonTemp> root, CommonSearchBean commonSearchBean) {
-		if (null != commonSearchBean.getActionType()) {
-			predicates.add(criteriaBuilder
-					.and(criteriaBuilder.equal(root.get("actionType"), commonSearchBean.getActionType())));
-		}
-	}
-
-	private void userGroupCriteriaBuilder(List<Predicate> predicates, CriteriaBuilder criteriaBuilder,
-			Root<CommonTemp> root, CommonSearchBean commonSearchBean) {
-		if (null != commonSearchBean.getUserGroup() && !commonSearchBean.getUserGroup().isEmpty()) {
-			predicates.add(
-					criteriaBuilder.and(criteriaBuilder.equal(root.get("userGroup"), commonSearchBean.getUserGroup())));
+					.and(criteriaBuilder.equal(root.get("type"), commonSearchBean.getType())));
 		}
 	}
 
 	private void userIdCriteriaBuilder(List<Predicate> predicates, CriteriaBuilder criteriaBuilder,
-			Root<CommonTemp> root, CommonSearchBean commonSearchBean) {
+			Root<CommonTempWorkflow> root, CommonSearchBean commonSearchBean) {
 		if (null != commonSearchBean.getUserId() && !commonSearchBean.getUserId().isEmpty()) {
 			predicates.add(
 					criteriaBuilder.and(criteriaBuilder.equal(root.get("createdBy"), commonSearchBean.getUserId())));
@@ -102,7 +86,7 @@ public class TempCustomRepository {
 	}
 
 	private void hashTagsCriteriaBuilder(List<Predicate> predicates, CriteriaBuilder criteriaBuilder,
-			Root<CommonTemp> root, CommonSearchBean commonSearchBean) {
+			Root<CommonTempWorkflow> root, CommonSearchBean commonSearchBean) {
 		if (null != commonSearchBean.getHashTags() && !commonSearchBean.getHashTags().isEmpty()) {
 			predicates.add(criteriaBuilder
 					.and(criteriaBuilder.like(root.get("hashTags"), "%" + commonSearchBean.getHashTags() + "%")));
@@ -110,10 +94,18 @@ public class TempCustomRepository {
 	}
 
 	private void statusCriteriaBuilder(List<Predicate> predicates, CriteriaBuilder criteriaBuilder,
-			Root<CommonTemp> root, CommonSearchBean commonSearchBean) {
+			Root<CommonTempWorkflow> root, CommonSearchBean commonSearchBean) {
 		if (null != commonSearchBean.getStatus()) {
 			predicates.add(
 					criteriaBuilder.and(criteriaBuilder.equal(root.get("status"), commonSearchBean.getStatus())));
+		}
+	}
+
+	private void companyIdCriteriaBuilder(List<Predicate> predicates, CriteriaBuilder criteriaBuilder,
+									   Root<CommonTempWorkflow> root, CommonSearchBean commonSearchBean) {
+		if (null != commonSearchBean.getCompanyId()) {
+			predicates.add(
+					criteriaBuilder.and(criteriaBuilder.equal(root.get("companyId"), commonSearchBean.getCompanyId())));
 		}
 	}
 

@@ -13,11 +13,10 @@ public class TempDto {
 	private Long id;
 	private String signature;
 	private String workflowId;
-	private String assignId;
-	private String requestType;
+	private String companyId;
+	private String type;
 	private String referenceNo;
 	private String lastUpdatedBy;
 	private Date lastUpdatedDate;
-	private String userGroup;
 	private Map<String, Object> requestPayload;
 }
