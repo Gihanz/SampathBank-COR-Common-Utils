@@ -4,6 +4,7 @@
 package biz.nable.sb.cor.common.response.workflow;
 
 import biz.nable.sb.cor.common.bean.workflow.WorkflowBean;
+import biz.nable.sb.cor.common.response.CommonResponse;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
