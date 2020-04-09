@@ -99,7 +99,7 @@ public class WorkflowComponent {
 		headers.set("type", commonSearchBean.getType());
 		HttpEntity<CreateApprovalRequest> entity = new HttpEntity<>(headers);
 		try {
-			String assignListUrl = workflowServiceUrl + "/getWorkflowDetails";
+			String assignListUrl = workflowServiceUrl + "/v1/workflow/getDetails";
 
 			ResponseEntity<WorkflowResponse> responseEntity = restTemplate.exchange(assignListUrl, HttpMethod.GET,
 					entity, WorkflowResponse.class);

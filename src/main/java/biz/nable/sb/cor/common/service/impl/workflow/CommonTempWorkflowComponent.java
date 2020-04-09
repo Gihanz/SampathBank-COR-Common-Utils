@@ -149,7 +149,7 @@ public class CommonTempWorkflowComponent {
 		HttpEntity<CreateWorkflowRequest> entity = new HttpEntity<>(request, headers);
 		CreateWorkflowResponse response = null;
 		try {
-			String createApprovalUrl = workflowServiceUrl + "/workflow/request";
+			String createApprovalUrl = workflowServiceUrl + "/v1/workflow/request";
 			ResponseEntity<CreateWorkflowResponse> responseEntity = restTemplate.postForEntity(createApprovalUrl,
 					entity, CreateWorkflowResponse.class);
 			if (null != responseEntity.getBody()) {
