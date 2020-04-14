@@ -154,7 +154,7 @@ public class CommonTempWorkflowComponent {
 					entity, CreateWorkflowResponse.class);
 			if (null != responseEntity.getBody()) {
 				response = responseEntity.getBody();
-			} else {
+            } else {
 				logger.error("Create workflow request reserved null response");
 				throw new SystemException(messageSource.getMessage(ErrorCode.CREATE_WORKFLOW_ERROR, null,
 						LocaleContextHolder.getLocale()), ErrorCode.CREATE_WORKFLOW_ERROR);
