@@ -3,7 +3,6 @@ package biz.nable.sb.cor.common.service.impl.workflow;
 import biz.nable.sb.cor.common.bean.workflow.CommonSearchBean;
 import biz.nable.sb.cor.common.bean.workflow.TempDto;
 import biz.nable.sb.cor.common.db.criteria.workflow.TempCustomWorkflowRepository;
-import biz.nable.sb.cor.common.db.entity.CommonTemp;
 import biz.nable.sb.cor.common.db.entity.workflow.CommonTempWorkflow;
 import biz.nable.sb.cor.common.exception.InvalidRequestException;
 import biz.nable.sb.cor.common.exception.RecordNotFoundException;
@@ -54,7 +53,7 @@ public class WorkflowComponent {
 				WorkflowStatus.PENDING, searchBy);
 		String userId = commonSearchBean.getUserId();
 		commonSearchBean.setUserId(null);
-		commonSearchBean.setStatus(WorkflowStatus.PENDING);
+		commonSearchBean.setStatus(WorkflowStatus.PENDING.name());
 		List<CommonTempWorkflow> commonTemps = tempCustomWorkflowRepository.findTempRecordList(commonSearchBean);
 
 		if (!commonTemps.isEmpty()) {

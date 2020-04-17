@@ -23,6 +23,7 @@ import java.util.Date;
 @ToString
 public class WorkflowBean {
 
+	@JsonInclude(Include.NON_NULL)
 	private String workflowId;
 
 	private String referenceId;
@@ -30,6 +31,8 @@ public class WorkflowBean {
 	private String companyId;
 
 	private String type;
+
+	private String action;
 
 	private String subType;
 
@@ -54,12 +57,6 @@ public class WorkflowBean {
 
 	@JsonInclude(Include.NON_NULL)
 	private String remarks;
-	
+
 	private String dbaccount;
-	
-	
-
-
-
-
 }

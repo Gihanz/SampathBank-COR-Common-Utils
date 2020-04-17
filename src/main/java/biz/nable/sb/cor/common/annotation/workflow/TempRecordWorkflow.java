@@ -21,5 +21,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  */
 public @interface TempRecordWorkflow {
 
+	ActionTypeEnum actionType();
 
 }

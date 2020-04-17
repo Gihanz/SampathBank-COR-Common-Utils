@@ -1,6 +1,7 @@
 package biz.nable.sb.cor.common.bean.workflow;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
@@ -15,7 +16,7 @@ public class CommonRequestWorkflowBean {
 	private String referenceId;
 	private String companyId;
 	private String type;
-	private String subType;
+	//private String subType;
 	private String domain;
 	private BigDecimal amount;
 	private String modifiedBy;
@@ -23,7 +24,8 @@ public class CommonRequestWorkflowBean {
 	private String status;
 	private String remarks;
 	private String dbaccount;
-
+	private String action;
+	
 	private String hashTags;
 	private String tempId;
 }

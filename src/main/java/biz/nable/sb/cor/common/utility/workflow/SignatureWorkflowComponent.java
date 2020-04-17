@@ -24,7 +24,7 @@ public class SignatureWorkflowComponent {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	public String genarateSignature(CommonTempWorkflow commonTemp) {
-		String signatureData = commonTemp.getWorkflowId().concat(commonTemp.getReferenceNo())
+		String signatureData = commonTemp.getWorkflowId().concat(commonTemp.getReferenceId())
 				.concat(commonTemp.getType()).concat(commonTemp.getCompanyId())
 				.concat(commonTemp.getLastUpdatedDate().toString());
 		logger.info(">>>>>>>>>>>>>> Start genrateSignature <<<<<<<<<<<<<<<<<<");

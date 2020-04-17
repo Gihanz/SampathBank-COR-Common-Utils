@@ -135,7 +135,7 @@ public class CommonTempWorkflowComponent {
 		request.setReferenceId(commonRequestWorkflowBean.getReferenceId());
 		request.setCompanyId(commonRequestWorkflowBean.getCompanyId());
 		request.setType(commonRequestWorkflowBean.getType());
-		request.setSubType(commonRequestWorkflowBean.getSubType());
+		//request.setSubType(commonRequestWorkflowBean.getSubType());
 		request.setDomain(commonRequestWorkflowBean.getDomain());
 		request.setAmount(commonRequestWorkflowBean.getAmount());
 		request.setCreatedBy(commonRequestWorkflowBean.getUserId());
@@ -145,6 +145,7 @@ public class CommonTempWorkflowComponent {
 		request.setStatus(commonRequestWorkflowBean.getStatus());
 		request.setRemarks(commonRequestWorkflowBean.getRemarks());
 		request.setDbaccount(commonRequestWorkflowBean.getDbaccount());
+		request.setAction(commonRequestWorkflowBean.getAction());
 
 		HttpEntity<CreateWorkflowRequest> entity = new HttpEntity<>(request, headers);
 		CreateWorkflowResponse response = null;
